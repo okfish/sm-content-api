@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sm_content_api"
-version = "1.0.0"
+version = "0.1.0"
 description = "Content and Auth API"
 authors = ["API Support <merchant.api@sbermarket.ru>"]
 license = "NoLicense"
@@ -10,7 +10,7 @@ keywords = ["OpenAPI", "OpenAPI-Generator", "Content and Auth API"]
 include = ["sm_content_api/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 
 urllib3 = ">= 1.25.3"
 python-dateutil = ">=2.8.2"

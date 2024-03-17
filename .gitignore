@@ -36,6 +36,8 @@ components/
 bower_components/
 cookies/
 *.bat
+.env
+.env.*
 
 # IDE files
 .project
