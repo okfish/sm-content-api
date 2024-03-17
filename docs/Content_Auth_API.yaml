@@ -1,0 +1,920 @@
+components:
+  examples:
+    BadRequest:
+      summary: Не верный формат
+      value:
+        error:
+          invalid_params:
+          - name: age
+            reason: must be a positive integer
+          - name: color
+            reason: must be 'green', 'red' or 'blue'
+          status: 400
+          title: Your request parameters didn't validate.
+          type: validation-error
+    BusinessError:
+      summary: Ошибка бизнес логики
+      value:
+        error:
+          detail: Basket must have more then 1 item
+          status: 422
+          title: Empty basket can't be accepted.
+          type: wrong-basket
+    Forbidden:
+      summary: Не верная роль доступа
+      value:
+        error:
+          status: 403
+          title: The server understood the request but refuses to authorize it.
+          type: forbidden
+    InternalServerError:
+      summary: Не обработанная ошибка
+      value:
+        error:
+          status: 500
+          title: Internal server error.
+          type: internal-server-error
+    NotFound:
+      summary: Ресурс не найден
+      value:
+        error:
+          status: 404
+          title: Requested resource is not available.
+          type: not-found
+    Unauthorized:
+      summary: Не аутентифицирован
+      value:
+        error:
+          status: 401
+          title: The request has not been applied because it lacks valid authentication
+            credentials for the target resource.
+          type: unauthorized
+  responses:
+    ImportResponse:
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                properties:
+                  task_id:
+                    description: Идентификатор задачи на загрузку данных
+                    example: abc-edf-15
+                    type: string
+                required:
+                - task_id
+                type: object
+            required:
+            - data
+            type: object
+      description: Результат выполнения запроса на создание/изменение данных
+    ImportStatusResponse:
+      content:
+        application/json:
+          schema:
+            properties:
+              data:
+                properties:
+                  file_name:
+                    description: Название файла
+                    example: goods_202209271025.xml
+                    type: string
+                  invalid_params:
+                    description: Ошибки в данных
+                    properties:
+                      categories:
+                        description: Перечень ошибок в данных категорий
+                        items:
+                          $ref: '#/components/schemas/Error'
+                        type: array
+                      offers:
+                        description: Перечень ошибок в данных товаров
+                        items:
+                          $ref: '#/components/schemas/Error'
+                        type: array
+                      options_groups:
+                        description: Перечень ошибок в данных наборов групп
+                        items:
+                          $ref: '#/components/schemas/Error'
+                        type: array
+                      options_offers:
+                        description: Перечень ошибок в данных опций наборов групп
+                        items:
+                          $ref: '#/components/schemas/Error'
+                        type: array
+                      prices:
+                        description: Перечень ошибок в данных цен
+                        items:
+                          $ref: '#/components/schemas/Error'
+                        type: array
+                      stocks:
+                        description: Перечень ошибок в данных остатков
+                        items:
+                          $ref: '#/components/schemas/Error'
+                        type: array
+                    type: object
+                  status:
+                    description: Статус обработки задачи
+                    example: done
+                    type: string
+                required:
+                - status
+                - file_name
+                type: object
+            required:
+            - data
+            type: object
+      description: Результат выполнения запроса на получение статуса задачи импорта
+    status400:
+      content:
+        application/json:
+          examples:
+            json:
+              $ref: '#/components/examples/BadRequest'
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: ""
+    status401:
+      content:
+        application/json:
+          examples:
+            json:
+              $ref: '#/components/examples/Unauthorized'
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: ""
+    status403:
+      content:
+        application/json:
+          examples:
+            json:
+              $ref: '#/components/examples/Forbidden'
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: ""
+    status404:
+      content:
+        application/json:
+          examples:
+            json:
+              $ref: '#/components/examples/NotFound'
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: ""
+    status422:
+      content:
+        application/json:
+          examples:
+            json:
+              $ref: '#/components/examples/BusinessError'
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Для бизнес ошибок мы используем 422 статус. type - однозначно отражает
+        суть ошибки для данного запроса. Это самое важное поле.
+    status500:
+      content:
+        application/json:
+          examples:
+            json:
+              $ref: '#/components/examples/InternalServerError'
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: ""
+  schemas:
+    Attribute:
+      description: Информация об атрибуте товара
+      properties:
+        attribute:
+          description: Идентификатор характеристики.
+          type: string
+        values:
+          description: Массив со значениями характеристик
+          items:
+            type: string
+          type: array
+      required:
+      - attribute
+      - values
+      type: object
+    Availability:
+      description: Данные о доступности товара/блюда
+      properties:
+        active:
+          description: Данные о доступности товара
+          type: boolean
+        active_from:
+          description: Дата начала действия записи о доступности
+          example: "2023-02-18"
+          type: string
+        active_to:
+          description: Дата начала действия записи о доступности
+          example: "2023-02-18"
+          type: string
+        intraday_active_from:
+          description: Начало ограничения доступности по времени внутри дня (Например
+            товары для завтрака)
+          example: "09:30:00"
+          type: string
+        intraday_active_to:
+          description: Конец ограничения доступности по времени внутри дня (Например
+            товары для завтрака)
+          example: "12:00:00"
+          type: string
+        offer_id:
+          description: Уникальный идентификатор товара в вашей системе
+          example: "1001"
+          type: string
+        outlet_id:
+          description: Уникальный идентификатор магазина/ресторана в вашей системе
+          example: "12"
+          type: string
+      required:
+      - offer_id
+      - outlet_id
+      - active
+      type: object
+    Category:
+      description: Данные о категории товаров
+      properties:
+        id:
+          description: Уникальный идентификатор категории в вашей системе
+          example: "100"
+          type: string
+        name:
+          description: Название категории
+          example: Сыры
+          type: string
+        parent_id:
+          description: Уникальный идентификатор родительской категории в вашей системе
+          example: "1"
+          type: string
+        position:
+          description: Номер сортировки категории - чем меньше число, тем выше (раньше)
+            она отображается на экране пользователя
+          example: 1
+          format: int32
+          type: integer
+        status:
+          default: ACTIVE
+          description: Обозначение активности категории у мерчанта
+          enum:
+          - ACTIVE
+          - INACTIVE
+          - DELETE
+          example: ACTIVE
+          type: string
+      required:
+      - id
+      - name
+      - position
+      type: object
+    CommonDataObjectsProblemDetails:
+      additionalProperties: false
+      description: Common data object for describing an error details
+      properties:
+        detail:
+          description: человекочитаемое описание ошибки, объясняющее причины текущей
+            ситуации возникновения ошибки. Запрещено парсить клиентом, только для
+            пояснения ошибки разработчику
+          example: Basket must have more then 1 item
+          type: string
+        invalid_params:
+          description: обязательное только для ответа 400. Список ошибок для переданных
+            полей
+          items:
+            additionalProperties: false
+            properties:
+              name:
+                description: имя поля
+                example: age
+                minLength: 1
+                type: string
+              reason:
+                description: текст ошибки валидации поля
+                example: must be a positive integer
+                minLength: 1
+                type: string
+            required:
+            - name
+            - reason
+            type: object
+          type: array
+        status:
+          description: HTTP-код статуса, соответствует соответствующему коду ответа
+            сервера. Нужно для систем
+          example: 400
+          format: int32
+          maximum: 599
+          minimum: 100
+          type: integer
+          x-docs-examples:
+          - "200"
+          - "201"
+          - "400"
+          - "503"
+        title:
+          description: человекочитаемое описание сути проблемы, не должно изменяться
+            для различных появлений данной проблемы, за исключением случаев локализации
+          example: Your request parameters didn't validate
+          minLength: 1
+          type: string
+          x-docs-examples:
+          - Your request parameters didn't validate
+          - Requested resource is not available
+          - Internal server error
+        type:
+          description: уникальный идентификатор ошибки. Должно коротко, но понятно
+            отражать суть ошибки. На него опирается потребитель(фронтенд) при принятии
+            решения
+          example: validation-error
+          minLength: 1
+          type: string
+          x-docs-examples:
+          - validation-error
+          - unauthorized
+          - forbidden
+          - internal-server-error
+          - wrong-basket
+          - not-found
+      required:
+      - type
+      - title
+      - status
+      title: Problem details
+      type: object
+    Error:
+      description: информация об ошибке в формате problem-details
+      properties:
+        error:
+          $ref: '#/components/schemas/CommonDataObjectsProblemDetails'
+      type: object
+    Image:
+      description: Изображение товара
+      properties:
+        name:
+          description: Наименование изображения
+          example: 1001.jpg
+          type: string
+        url:
+          description: URL изображения
+          example: https://yoursite.ru/1001.jpg
+          type: string
+      required:
+      - url
+      - name
+      type: object
+    Offer:
+      description: Данные о продаваемом товаре
+      properties:
+        attributes:
+          description: Дополнительные атрибуты/параметры товара
+          items:
+            $ref: '#/components/schemas/Attribute'
+          type: array
+        barcodes:
+          description: Штрихкоды для весовых товаров
+          items:
+            example: "4607004890287"
+            type: string
+          type: array
+        categories_ids:
+          description: Массив с идентификаторами категорий к которым относится товар
+          example:
+          - "10"
+          - "101"
+          - "105"
+          items:
+            type: string
+          type: array
+        description:
+          description: Описание товара
+          example: В сыре не просто много, а очень много кусочков натуральной ветчины.
+            Высококачественная натуральная ветчина измельчается на кусочки прямо перед
+            добавлением.
+          type: string
+        id:
+          description: Уникальный идентификатор товара в вашей системе
+          example: "1000"
+          type: string
+        images:
+          description: Изображения товара
+          items:
+            $ref: '#/components/schemas/Image'
+          type: array
+        items_per_pack:
+          default: 1
+          description: Количество товаров в упаковке
+          example: 1
+          format: int32
+          type: integer
+        name:
+          description: Наиментование товара
+          example: Плавленый сыр Hochland с ветчиной 55% 120 г
+          type: string
+        pack_type:
+          default: per_item
+          description: 'Тип упаковки, допустимые значения: per_item, per_kilo'
+          example: per_item
+          type: string
+        position:
+          description: Номер сортировки товара/блюда в категории - чем меньше число,
+            тем выше (раньше) отображение на экране пользователя
+          example: 1
+          format: int32
+          type: integer
+        status:
+          default: ACTIVE
+          description: Обозначение активности оффера у мерчанта
+          enum:
+          - ACTIVE
+          - INACTIVE
+          example: ACTIVE
+          type: string
+      required:
+      - id
+      - name
+      - position
+      - status
+      type: object
+    OfferPrice:
+      description: Данные о цене товара
+      properties:
+        offer_id:
+          description: Уникальный идентификатор товара в вашей системе
+          example: "1001"
+          type: string
+        outlet_id:
+          description: Уникальный идентификатор магазина/ресторана в вашей системе
+          example: "12"
+          type: string
+        price:
+          description: Цена товара
+          properties:
+            amount:
+              description: Количество (сумма)
+              example: "198.99"
+              format: decimal
+              type: string
+            currency:
+              description: Валюта в формате ISO-4217 (три большие буквы)
+              example: RUB
+              format: iso-4217
+              type: string
+          required:
+          - amount
+          - currency
+          type: object
+        price_promo:
+          description: Акционная цена товара
+          properties:
+            amount:
+              description: Количество (сумма)
+              example: "198.99"
+              format: decimal
+              type: string
+            currency:
+              description: Валюта в формате ISO-4217 (три большие буквы)
+              example: RUB
+              format: iso-4217
+              type: string
+          required:
+          - amount
+          - currency
+          type: object
+        promo_end_at:
+          description: Дата окончания действия акционной цены
+          example: 2023-02-25T20:00:00
+          format: date-time
+          type: string
+        promo_start_at:
+          description: Дата начала действия акционной цены
+          example: 2023-02-18T12:00:00
+          format: date-time
+          type: string
+        vat:
+          description: Размер налога на добавленную стоимость (НДС) <br> `NO_VAT`
+            - Без НДС <br> `VAT0` - НДС 0% <br> `VAT10` - НДС 10% <br> `VAT20` - НДС
+            20% <br>
+          enum:
+          - NO_VAT
+          - VAT0
+          - VAT10
+          - VAT20
+          example: VAT20
+          type: string
+      required:
+      - offer_id
+      - outlet_id
+      - price
+      - vat
+      type: object
+    Option:
+      description: Опции блюда
+      properties:
+        offer_id:
+          description: Идентификатор опции/добавки/основы (эта опция должна передаваться
+            ещё как отдельное блюдо/оффер с меткой is_option=true)
+          example: "1000"
+          type: string
+        selected:
+          description: Включена ли данная опция по умолчанию
+          example: false
+          type: boolean
+      required:
+      - offer_id
+      - selected
+      type: object
+    OptionsGroup:
+      description: Группа опций (для ресторанов)
+      properties:
+        base_offer_id:
+          description: Идентификатор базового блюда, для которого создаётся группа
+          example: "1001"
+          type: string
+        id:
+          description: Уникальный идентификатор набора опций
+          example: "100"
+          type: string
+        max_amount:
+          description: Максимальное количество опций, которое можно выбрать в рамках
+            группы. 0, если ограничения нет.
+          example: 1
+          format: int32
+          type: integer
+        min_amount:
+          description: Минимальное количество опций, которое можно выбрать в рамках
+            группы
+          example: 1
+          format: int32
+          type: integer
+        name:
+          description: Название набора опций
+          example: Выберите первое блюдо
+          type: string
+        options:
+          description: Массив с опциями
+          items:
+            $ref: '#/components/schemas/Option'
+          type: array
+      required:
+      - id
+      - name
+      - base_offer_id
+      - min_amount
+      - max_amount
+      - options
+      type: object
+  securitySchemes:
+    oAuth2ClientCredentials:
+      flows:
+        clientCredentials:
+          scopes: {}
+          tokenUrl: /auth/token
+      type: oauth2
+info:
+  contact:
+    email: merchant.api@sbermarket.ru
+    name: API Support
+    url: https://docs.sbermarket.ru/
+  description: "Sbermarket API для мерчантов и ресторанов.\n\nПозволяет управлять:\n- ассортиментом
+    товаров;\n- меню;\n- остатками товаров в магазинах;\n- доступностью блюд;\n- ценами
+    и акциями на товары и блюда.\n\nБазовый URL для запросов: `https://merchant-api.sbermarket.ru`\n
+    
+    API для мерчантов для получения access tokens.
+    # Порядок работы
+    1. Получить access token, выполнив POST /auth/token по oAuth 2.0 flow (client credentials)"
+  title: Content and Auth API
+  version: 0.0.2a
+openapi: 3.0.3
+paths:
+  /api/v1/import/availability:
+    put:
+      description: |
+        В одном запросе можно передать до 1000 записей. Каждая запись — это отдельный элемент в массиве.
+
+        В одном запросе, можно передавать информацию о доступности в разных магазинах, ограничение составляет до 10 уникальных магазинов.
+
+        ***rate-limiting*** - максимальная частота запросов составляет 10 запросов в секунду. В случаях, когда лимит будет превышен, сервер вернёт ошибку с кодом 429.
+      operationId: importAvailability
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  description: Массив с данными о доступности товаров/блюд
+                  items:
+                    $ref: '#/components/schemas/Availability'
+                  type: array
+              required:
+              - data
+              type: object
+        required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/ImportResponse'
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Некорректно указаны данные в запросе
+        "401":
+          $ref: '#/components/responses/status401'
+      summary: Указать доступность товаров/блюд
+      tags:
+      - Import
+      x-since-date: "2022-12-21"
+      x-stability-level: alpha
+  /api/v1/import/categories:
+    put:
+      description: |
+        В одном запросе можно передать до 1000 категорий. Каждая категория — это отдельный элемент в массиве.
+
+        ***rate-limiting*** - максимальная частота запросов составляет 10 запросов в секунду. В случаях, когда лимит будет превышен, сервер вернёт ошибку с кодом 429.
+      operationId: importCategories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  description: Массив с данными категорий товаров
+                  items:
+                    $ref: '#/components/schemas/Category'
+                  type: array
+              required:
+              - data
+              type: object
+        required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/ImportResponse'
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Некорректно указаны данные в запросе
+        "401":
+          $ref: '#/components/responses/status401'
+      summary: Создать или обновить категорию товаров
+      tags:
+      - Import
+      x-since-date: "2022-12-21"
+      x-stability-level: alpha
+  /api/v1/import/offer-images:
+    post:
+      description: |
+        Загрузка изображения оффера.
+
+        Загрузка фотографий должна осуществляться только после того, как была передана информация об офферах.
+
+        ***rate-limiting*** - максимальная частота запросов составляет 10 запросов в секунду. В случаях, когда лимит будет превышен, сервер вернёт ошибку с кодом 429.
+
+        Необходимо отправить обычный POST запрос с Content-Type multipart/form-data, содержащую файл с картинкой и метаинформацией, описанной ниже.
+      operationId: uploadOfferImage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                image:
+                  description: Изображение
+                  format: binary
+                  type: string
+                offer_id:
+                  description: ID оффера
+                  type: string
+                position:
+                  description: Позиция
+                  format: int32
+                  type: integer
+              type: object
+        description: Изображение и сопутствующие ему метаданные
+        required: true
+      responses:
+        "201":
+          description: Изображение оффера успешно загружено
+        "400":
+          content:
+            application/json:
+              examples:
+                InvalidRequest:
+                  summary: Некорректный запрос
+                  value:
+                    error:
+                      status: 400
+                      title: Can't parse request body
+                      type: validation-error
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ""
+        "401":
+          $ref: '#/components/responses/status401'
+      summary: Загружает изображение товара (оффера)
+      tags:
+      - Import
+      x-since-date: "2023-07-10"
+      x-stability-level: alpha
+  /api/v1/import/offers:
+    put:
+      description: |
+        В одном запросе можно передать до 1000 товаров. Каждый товар — это отдельный элемент в массиве.
+
+        ***rate-limiting*** - максимальная частота запросов составляет 10 запросов в секунду. В случаях, когда лимит будет превышен, сервер вернёт ошибку с кодом 429.
+      operationId: importOffers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  description: Массив с данными товаров
+                  items:
+                    $ref: '#/components/schemas/Offer'
+                  type: array
+              required:
+              - data
+              type: object
+        required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/ImportResponse'
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Некорректно указаны данные в запросе
+        "401":
+          $ref: '#/components/responses/status401'
+      summary: Создать или обновить товар
+      tags:
+      - Import
+      x-since-date: "2022-12-21"
+      x-stability-level: alpha
+  /api/v1/import/options-groups:
+    put:
+      description: |
+        В одном запросе можно передать до 1000 наборов. Каждый набор опций — это отдельный элемент в массиве.
+
+        ***rate-limiting*** - максимальная частота запросов составляет 10 запросов в секунду. В случаях, когда лимит будет превышен, сервер вернёт ошибку с кодом 429.
+      operationId: importOptionsGroups
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  description: Массив с данными наборов опций блюд (для ресторанов)
+                  items:
+                    $ref: '#/components/schemas/OptionsGroup'
+                  type: array
+              required:
+              - data
+              type: object
+        required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/ImportResponse'
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Некорректно указаны данные в запросе
+        "401":
+          $ref: '#/components/responses/status401'
+      summary: Создать или обновить наборы опций блюд (для ресторанов)
+      tags:
+      - Import
+      x-since-date: "2022-12-21"
+      x-stability-level: alpha
+  /api/v1/import/prices:
+    put:
+      description: |
+        В одном запросе можно передать до 1000 товаров. Каждая цена — это отдельный элемент в массиве.
+
+        В одном запросе, можно передавать информацию о ценах и акциях в разных магазинах, ограничение составляет до 10 уникальных магазинов.
+
+        ***rate-limiting*** - максимальная частота запросов составляет 10 запросов в секунду. В случаях, когда лимит будет превышен, сервер вернёт ошибку с кодом 429.
+      operationId: importPrices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                data:
+                  description: Массив с данными цен товаров
+                  items:
+                    $ref: '#/components/schemas/OfferPrice'
+                  type: array
+              required:
+              - data
+              type: object
+        required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/ImportResponse'
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Некорректно указаны данные в запросе
+        "401":
+          $ref: '#/components/responses/status401'
+      summary: Обновить цену товаров
+      tags:
+      - Import
+      x-since-date: "2022-12-21"
+      x-stability-level: alpha
+  /auth/token:
+    post:
+      x-since-date: "2022-12-21"
+      tags:
+        - Authentication
+      summary: Получение JWT токена
+      description: Запрос на получение JWT токена
+      operationId: getToken
+      security: []
+      requestBody:
+        description: Стандартный способ получения JWT токена по oAuth2 (client credentials flow)
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                client_id:
+                  type: string
+                client_secret:
+                  type: string
+                grant_type:
+                  type: string
+                  enum:
+                    - client_credentials
+              required:
+                - client_id
+                - client_secret
+                - grant_type
+            examples:
+              CreateToken:
+                summary: Получить JWT токен
+                value:
+                  client_id: "the_best_one_retailer"
+                  client_secret: "620C...220B2"
+                  grant_type: "client_credentials"
+      responses:
+        '200':
+          description: Успешное создание получение токена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  expires_in:
+                    type: number
+                    format: int32
+                  refresh_expires_in:
+                    type: number
+                    format: int32
+                  token_type:
+                    type: string
+                    enum:
+                      - Bearer
+                  not-before-policy:
+                    type: number
+                    format: int32
+                  scopes:
+                    type: string
+                required:
+                  - access_token
+                  - expires_in
+                  - token_type
+                  - scopes
+              examples:
+                NewToken:
+                  summary: Успешное получение токена
+                  value:
+                    access_token: "sInN1...TI2I"
+                    expires_in: 300
+                    refresh_expires_in: 0
+                    token_type: Bearer
+                    not-before-policy: 0
+                    scopes: ""
+security:
+- oAuth2ClientCredentials: []
+servers:
+- description: URL production сервера
+  url: https://merchant-api.sbermarket.ru
+- description: URL stage сервера
+  url: https://merchant-api.k-stage.sbermarket.tech
+tags:
+- description: Точечный JSON инфообмен для мерчантов и ресторанов
+  name: Import
+- description: Аутентификация
+  name: Authentication
+x-linter-allowed-verbs: import, status
