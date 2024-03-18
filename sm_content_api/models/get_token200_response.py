@@ -32,7 +32,7 @@ class GetToken200Response(BaseModel):
     refresh_expires_in: Optional[Union[StrictFloat, StrictInt]] = None
     token_type: StrictStr
     not_before_policy: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="not-before-policy")
-    scopes: StrictStr
+    scopes: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["access_token", "expires_in", "refresh_expires_in", "token_type", "not-before-policy", "scopes"]
 
     @field_validator('token_type')
