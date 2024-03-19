@@ -28,7 +28,7 @@ from typing import Tuple, Optional, List, Dict, Union
 from sm_content_api.configuration import Configuration
 from sm_content_api.api_response import ApiResponse, T as ApiResponseT
 import sm_content_api.models
-from sm_content_api import rest
+from sm_content_api import rest, __version__
 from sm_content_api.exceptions import (
     ApiValueError,
     ApiException,
@@ -88,7 +88,7 @@ class ApiClient:
             self.default_headers[header_name] = header_value
         self.cookie = cookie
         # Set default User-Agent.
-        self.user_agent = 'OpenAPI-Generator/1.0.0/python'
+        self.user_agent = f'SM-Content-API-Client/{__version__}'
         self.client_side_validation = configuration.client_side_validation
 
     async def __aenter__(self):
