@@ -17,6 +17,7 @@ import unittest
 
 from sm_content_api.models.category import Category
 
+
 class TestCategory(unittest.TestCase):
     """Category unit test stubs"""
 
@@ -32,8 +33,6 @@ class TestCategory(unittest.TestCase):
             params are included, when True both required and
             optional params are included """
         # uncomment below to create an instance of `Category`
-        """
-        model = Category()
         if include_optional:
             return Category(
                 id = '100',
@@ -48,12 +47,12 @@ class TestCategory(unittest.TestCase):
                 name = 'Сыры',
                 position = 1,
         )
-        """
 
     def testCategory(self):
         """Test Category"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
+
 
 if __name__ == '__main__':
     unittest.main()

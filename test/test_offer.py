@@ -15,7 +15,9 @@
 
 import unittest
 
+import sm_content_api
 from sm_content_api.models.offer import Offer
+
 
 class TestOffer(unittest.TestCase):
     """Offer unit test stubs"""
@@ -28,12 +30,10 @@ class TestOffer(unittest.TestCase):
 
     def make_instance(self, include_optional) -> Offer:
         """Test Offer
-            include_option is a boolean, when False only required
+            include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
         # uncomment below to create an instance of `Offer`
-        """
-        model = Offer()
         if include_optional:
             return Offer(
                 attributes = [
@@ -67,12 +67,12 @@ class TestOffer(unittest.TestCase):
                 position = 1,
                 status = 'ACTIVE',
         )
-        """
 
     def testOffer(self):
         """Test Offer"""
-        # inst_req_only = self.make_instance(include_optional=False)
-        # inst_req_and_optional = self.make_instance(include_optional=True)
+        inst_req_only = self.make_instance(include_optional=False)
+        inst_req_and_optional = self.make_instance(include_optional=True)
+
 
 if __name__ == '__main__':
     unittest.main()
