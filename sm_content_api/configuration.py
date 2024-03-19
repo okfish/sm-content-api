@@ -28,6 +28,7 @@ JSON_SCHEMA_VALIDATION_KEYWORDS = {
     'minLength', 'pattern', 'maxItems', 'minItems'
 }
 
+
 class Configuration:
     """This class contains various settings of the API client.
 
@@ -63,6 +64,7 @@ class Configuration:
     def __init__(self, host=None,
                  api_key=None, api_key_prefix=None,
                  username=None, password=None,
+                 client_id=None, client_secret=None, grant_type='client_credentials',
                  access_token=None,
                  server_index=None, server_variables=None,
                  server_operation_index=None, server_operation_variables=None,
@@ -104,6 +106,15 @@ class Configuration:
         self.password = password
         """Password for HTTP basic authentication
         """
+        self.client_id = client_id
+        """Client ID for OAuth authentication
+        """
+        self.client_secret = client_secret
+        """Client Secret for OAuth authentication
+        """
+        self.grant_type = grant_type
+        """Client Secret for OAuth authentication
+        """
         self.access_token = access_token
         """Access token
         """
@@ -111,7 +122,7 @@ class Configuration:
         """Logging Settings
         """
         self.logger["package_logger"] = logging.getLogger("sm_content_api")
-        self.logger["urllib3_logger"] = logging.getLogger("urllib3")
+        self.logger["aiohttp_logger"] = logging.getLogger("aiohttp.client")
         self.logger_format = '%(asctime)s %(levelname)s %(message)s'
         """Log format
         """
@@ -240,9 +251,6 @@ class Configuration:
 
         If the logger_file is None, then add stream handler and remove file
         handler. Otherwise, add file handler and remove stream handler.
-
-        :param value: The logger_file path.
-        :type: str
         """
         return self.__logger_file
 
@@ -269,8 +277,6 @@ class Configuration:
     def debug(self):
         """Debug status
 
-        :param value: The debug status, True or False.
-        :type: bool
         """
         return self.__debug
 
@@ -302,8 +308,6 @@ class Configuration:
 
         The logger_formatter will be updated when sets logger_format.
 
-        :param value: The format string.
-        :type: str
         """
         return self.__logger_format
 
