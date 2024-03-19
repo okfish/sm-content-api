@@ -14,55 +14,139 @@
 
 
 import unittest
+from dotenv import dotenv_values
 
-from sm_content_api.api.import_api import ImportApi
+import sm_content_api as smc
 
 
-class TestImportApi(unittest.TestCase):
+config = smc.configuration.Configuration()
+
+credentials = dotenv_values("../.env.test")
+
+access_token_expired = 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIyOVFtNGxOV293N1JVei1wRVZvbnktTkU1YkhibVZhdXExZWF5SlBmdlBRIn0.eyJleHAiOjE3MTA2OTQwOTIsImlhdCI6MTcxMDY5Mzc5MiwianRpIjoiMGJjZGM2NTMtOWNjYi00YmUwLWI4ZjctZmRkNGVlY2FmNzVlIiwiaXNzIjoiaHR0cHM6Ly9tZXJjaGFudC1hcGkuc2Jlcm1hcmtldC5ydS9hdXRoL3JlYWxtcy9tZXJjaGFudC1zZXJ2aWNlIiwic3ViIjoiYWY5NmIzNjgtMmIyYi00MTE2LWJlMmItYWU3MzkwMDhiYjllIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoicmV0YWlsZXJfZm9vZDRnb29kIiwic2NvcGUiOiIiLCJjbGllbnRIb3N0IjoiMTg4LjE2Mi42NC4xMzIiLCJjbGllbnRJZCI6InJldGFpbGVyX2Zvb2Q0Z29vZCIsInJldGFpbGVyX2lkIjoiMjE1ODYiLCJjbGllbnRBZGRyZXNzIjoiMTg4LjE2Mi42NC4xMzIifQ.UX_uVPL_iLZr3XCC8eiMNqk3_mailfTGo7k211ME-CEsd1lZeoGDIIpfA8TAVLVN-E-vjVIWswCKHPZNXC6oCcyxkyuUp80VfUfzI8gIAPtXyhbjOVNq4ecEPiImRndQlwSBfKT6Oy0kUk605Y4skOOt9WYGLpbOgSdXv7Yg6W--GVH7-mROtrqra_PASoItJVpunf7u1mYVuGykxmnfQywRCzIMgTUJh5pQuiFr_jrGXSYWf_3zzDrmv4YdKSKwom4cC1EU3hLfTHOVc498X_U8W4C4DJ1Un6atr0I2MXDmLypYuxO8TKGE7394PB-eR8GxWhKVjup9MsvyaVbb8w'
+
+config.access_token = access_token_expired
+config.retries = 3  # this enables aiohttp_retry client
+config.client_id = credentials['CLIENT_ID']  # str |
+config.client_secret = credentials['CLIENT_SECRET']  # str |
+config.grant_type = credentials['GRANT_TYPE']  # str |
+
+IMG_URL_PREFIX = credentials.get('IMG_URL_PREFIX', "https://example.org/")
+
+class TestImportApi(unittest.IsolatedAsyncioTestCase):
     """ImportApi unit test stubs"""
 
     def setUp(self) -> None:
-        self.api = ImportApi()
+        self.client = smc.ApiClient(config)
+        self.api = smc.ImportApi(self.client)
 
-    def tearDown(self) -> None:
-        pass
+    async def asyncTearDown(self) -> None:
+        await self.client.close()
 
-    def test_import_availability(self) -> None:
+    async def test_import_availability(self) -> None:
         """Test case for import_availability
 
         Указать доступность товаров/блюд
         """
         pass
 
-    def test_import_categories(self) -> None:
+    async def test_import_categories(self) -> None:
         """Test case for import_categories
 
         Создать или обновить категорию товаров
         """
-        pass
+        test_cat_parent = smc.models.Category(id='1889',
+                                              name='Суши',
+                                              position=1,
+                                              status='ACTIVE')
+        test_cat_parent_2 = smc.models.Category(id='1934',
+                                              name='Роллы',
+                                              position=2,
+                                              status='ACTIVE')
+        test_cat_child = smc.models.Category(id='1891',
+                                             name='Фирменные роллы',
+                                             parent_id='1934',
+                                             position=1,
+                                             status='INACTIVE')
 
-    def test_import_offers(self) -> None:
+        req = smc.models.ImportCategoriesRequest(data=[test_cat_parent, test_cat_child, test_cat_parent_2])
+        print(req)
+
+        api_response = None
+
+        try:
+            # Import categories
+            api_response = await self.api.import_categories(req)
+        except smc.ApiException as e:
+            print("Exception when calling ImportApi->import_categories: %s\n" % e)
+
+        self.assertIsInstance(api_response, smc.models.ImportAvailability200Response)
+        self.assertGreater(len(api_response.data.task_id), 1)
+
+        print(api_response.to_str())
+
+    async def test_import_offers(self) -> None:
         """Test case for import_offers
 
         Создать или обновить товар
         """
-        pass
+        test_offer_1 = smc.Offer(categories_ids = ["1891"],
+                               description='снежный краб в остром соусе',
+                               id='24141',
+                               images=[
+                                   smc.Image(
+                                       name='node_351.jpg',
+                                       url=f'{IMG_URL_PREFIX}images/node_351.jpg', )
+                                   ],
+                               items_per_pack=1,
+                               name='Острый краб',
+                               position=1,
+                               status='INACTIVE')
 
-    def test_import_options_groups(self) -> None:
+        test_offer_2 = smc.Offer(categories_ids = ["1889"],
+                               description='японский омлет',
+                               id='24107',
+                               images=[
+                                   smc.Image(
+                                       name='node_102.jpg',
+                                       url=f'{IMG_URL_PREFIX}images/node_102.jpg', )
+                                   ],
+                               items_per_pack=1,
+                               name='Суши с японским омлетом',
+                               position=1,
+                               status='INACTIVE')
+
+        req = smc.ImportOffersRequest(data=[test_offer_1, test_offer_2])
+        print(req)
+
+        api_response = None
+
+        try:
+            # Import categories
+            api_response = await self.api.import_offers(req)
+        except smc.ApiException as e:
+            print("Exception when calling ImportApi->import_offers: %s\n" % e)
+
+        self.assertIsInstance(api_response, smc.models.ImportAvailability200Response)
+        self.assertGreater(len(api_response.data.task_id), 1)
+
+        print(api_response.to_str())
+
+    async def test_import_options_groups(self) -> None:
         """Test case for import_options_groups
 
         Создать или обновить наборы опций блюд (для ресторанов)
         """
         pass
 
-    def test_import_prices(self) -> None:
+    async def test_import_prices(self) -> None:
         """Test case for import_prices
 
         Обновить цену товаров
         """
         pass
 
-    def test_upload_offer_image(self) -> None:
+    async def test_upload_offer_image(self) -> None:
         """Test case for upload_offer_image
 
         Загружает изображение товара (оффера)
