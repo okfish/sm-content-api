@@ -36,3 +36,5 @@ from sm_content_api.models.offer_price_price import OfferPricePrice
 from sm_content_api.models.offer_price_price_promo import OfferPricePricePromo
 from sm_content_api.models.option import Option
 from sm_content_api.models.options_group import OptionsGroup
+from sm_content_api.models.stock import Stock
+from sm_content_api.models.import_stocks_request import ImportStocksRequest
