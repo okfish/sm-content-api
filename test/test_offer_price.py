@@ -12,10 +12,12 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-
+import datetime
 import unittest
 
+import sm_content_api
 from sm_content_api.models.offer_price import OfferPrice
+
 
 class TestOfferPrice(unittest.TestCase):
     """OfferPrice unit test stubs"""
@@ -28,21 +30,19 @@ class TestOfferPrice(unittest.TestCase):
 
     def make_instance(self, include_optional) -> OfferPrice:
         """Test OfferPrice
-            include_option is a boolean, when False only required
+            include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
         # uncomment below to create an instance of `OfferPrice`
-        """
-        model = OfferPrice()
         if include_optional:
             return OfferPrice(
                 offer_id = '1001',
                 outlet_id = '12',
-                price = sm_content_api.models.offer_price_price.OfferPrice_price(
+                price = sm_content_api.models.offer_price_price.OfferPricePrice(
                     amount = '198.99', 
                     currency = 'RUB', ),
-                price_promo = sm_content_api.models.offer_price_price_promo.OfferPrice_price_promo(
-                    amount = '198.99', 
+                price_promo = sm_content_api.models.offer_price_price_promo.OfferPricePricePromo(
+                    amount = '98.99',
                     currency = 'RUB', ),
                 promo_end_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 promo_start_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
@@ -52,17 +52,20 @@ class TestOfferPrice(unittest.TestCase):
             return OfferPrice(
                 offer_id = '1001',
                 outlet_id = '12',
-                price = sm_content_api.models.offer_price_price.OfferPrice_price(
+                price = sm_content_api.models.offer_price_price.OfferPricePrice(
                     amount = '198.99', 
                     currency = 'RUB', ),
                 vat = 'VAT20',
         )
-        """
 
     def testOfferPrice(self):
         """Test OfferPrice"""
-        # inst_req_only = self.make_instance(include_optional=False)
-        # inst_req_and_optional = self.make_instance(include_optional=True)
+        inst_req_only = self.make_instance(include_optional=False)
+        inst_req_and_optional = self.make_instance(include_optional=True)
+
+        self.assertEqual(inst_req_only.price.amount, '198.99')
+        self.assertEqual(inst_req_and_optional.price_promo.amount, '98.99')
+
 
 if __name__ == '__main__':
     unittest.main()

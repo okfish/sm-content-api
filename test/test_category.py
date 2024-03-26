@@ -50,8 +50,10 @@ class TestCategory(unittest.TestCase):
 
     def testCategory(self):
         """Test Category"""
-        # inst_req_only = self.make_instance(include_optional=False)
-        # inst_req_and_optional = self.make_instance(include_optional=True)
+        inst_req_only = self.make_instance(include_optional=False)
+        inst_req_and_optional = self.make_instance(include_optional=True)
+        self.assertEqual(inst_req_only.id, '100')
+        self.assertEqual(inst_req_and_optional.status, 'ACTIVE')
 
 
 if __name__ == '__main__':

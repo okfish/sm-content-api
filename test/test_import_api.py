@@ -33,6 +33,7 @@ config.grant_type = credentials['GRANT_TYPE']  # str |
 
 IMG_URL_PREFIX = credentials.get('IMG_URL_PREFIX', "https://example.org/")
 
+
 class TestImportApi(unittest.IsolatedAsyncioTestCase):
     """ImportApi unit test stubs"""
 
@@ -90,20 +91,31 @@ class TestImportApi(unittest.IsolatedAsyncioTestCase):
 
         Создать или обновить товар
         """
-        test_offer_1 = smc.Offer(categories_ids = ["1891"],
-                               description='снежный краб в остром соусе',
-                               id='24141',
-                               images=[
-                                   smc.Image(
-                                       name='node_351.jpg',
-                                       url=f'{IMG_URL_PREFIX}images/node_351.jpg', )
-                                   ],
-                               items_per_pack=1,
-                               name='Острый краб',
-                               position=1,
-                               status='INACTIVE')
+        test_offer_1 = smc.Offer(categories_ids=["1891"],
+                                 description='снежный краб в остром соусе',
+                                 id='24141',
+                                 images=[
+                                     smc.Image(
+                                         name='node_351.jpg',
+                                         url=f'{IMG_URL_PREFIX}images/node_351.jpg', )
+                                     ],
+                                 attributes=[
+                                     smc.Attribute(attribute='is_option', values=['false',]),
+                                     smc.Attribute(attribute='weight_netto', values=['160',]),
+                                     smc.Attribute(attribute='weight_netto_unit', values=['G',]),
+                                     smc.Attribute(attribute='is_excisable', values=['false',]),
+                                     smc.Attribute(attribute='calories_per_portion', values=['321',]),
+                                     smc.Attribute(attribute='fats_per_portion', values=['11',]),
+                                     smc.Attribute(attribute='proteins_per_portion', values=['9',]),
+                                     smc.Attribute(attribute='carbohydrates_per_portion', values=['48',]),
+                                     smc.Attribute(attribute='ingredients', values=['снежный краб в остром соусе',]),
+                                 ],
+                                 items_per_pack=1,
+                                 name='Острый краб',
+                                 position=1,
+                                 status='ACTIVE')
 
-        test_offer_2 = smc.Offer(categories_ids = ["1889"],
+        test_offer_2 = smc.Offer(categories_ids=["1889"],
                                description='японский омлет',
                                id='24107',
                                images=[
@@ -111,10 +123,21 @@ class TestImportApi(unittest.IsolatedAsyncioTestCase):
                                        name='node_102.jpg',
                                        url=f'{IMG_URL_PREFIX}images/node_102.jpg', )
                                    ],
+                               attributes=[
+                                     smc.Attribute(attribute='is_option', values=['false', ]),
+                                     smc.Attribute(attribute='weight_netto', values=['89', ]),
+                                     smc.Attribute(attribute='weight_netto_unit', values=['G', ]),
+                                     smc.Attribute(attribute='is_excisable', values=['false', ]),
+                                     smc.Attribute(attribute='calories_per_portion', values=['89', ]),
+                                     smc.Attribute(attribute='fats_per_portion', values=['4', ]),
+                                     smc.Attribute(attribute='proteins_per_portion', values=['3', ]),
+                                     smc.Attribute(attribute='carbohydrates_per_portion', values=['10', ]),
+                                     smc.Attribute(attribute='ingredients', values=['японский омлет', ]),
+                                 ],
                                items_per_pack=1,
                                name='Суши с японским омлетом',
                                position=1,
-                               status='INACTIVE')
+                               status='ACTIVE')
 
         req = smc.ImportOffersRequest(data=[test_offer_1, test_offer_2])
         print(req)
@@ -122,7 +145,7 @@ class TestImportApi(unittest.IsolatedAsyncioTestCase):
         api_response = None
 
         try:
-            # Import categories
+            # Import offers
             api_response = await self.api.import_offers(req)
         except smc.ApiException as e:
             print("Exception when calling ImportApi->import_offers: %s\n" % e)
@@ -144,7 +167,70 @@ class TestImportApi(unittest.IsolatedAsyncioTestCase):
 
         Обновить цену товаров
         """
-        pass
+        req = smc.ImportPricesRequest(
+                data=[
+                    smc.OfferPrice(
+                        offer_id='24107',
+                        outlet_id='888',
+                        price=smc.OfferPricePrice(
+                            amount='69',
+                            currency='RUB', ),
+                        vat='NO_VAT'),
+                    smc.OfferPrice(
+                        offer_id='24141',
+                        outlet_id='888',
+                        price=smc.OfferPricePrice(
+                            amount='195',
+                            currency='RUB', ),
+                        vat='NO_VAT'),
+                    ],
+            )
+        print(req)
+
+        api_response = None
+
+        try:
+            # Import prices
+            api_response = await self.api.import_prices(req)
+        except smc.ApiException as e:
+            print("Exception when calling ImportApi->import_prices: %s\n" % e)
+
+        self.assertIsInstance(api_response, smc.models.ImportAvailability200Response)
+        self.assertGreater(len(api_response.data.task_id), 1)
+
+        print(api_response.to_str())
+
+    async def test_import_stocks(self) -> None:
+        """Test case for import_stocks
+
+        Обновить остатки товаров
+        """
+        req = smc.ImportStocksRequest(
+                data=[
+                    smc.Stock(
+                        offer_id='24107',
+                        outlet_id='888',
+                        stock='100', ),
+                    smc.Stock(
+                        offer_id='24141',
+                        outlet_id='888',
+                        stock='100', ),
+                    ],
+                )
+        print(req)
+
+        api_response = None
+
+        try:
+            # Import prices
+            api_response = await self.api.import_stocks(req)
+        except smc.ApiException as e:
+            print("Exception when calling ImportApi->import_stocks: %s\n" % e)
+
+        self.assertIsInstance(api_response, smc.models.ImportAvailability200Response)
+        self.assertGreater(len(api_response.data.task_id), 1)
+
+        print(api_response.to_str())
 
     async def test_upload_offer_image(self) -> None:
         """Test case for upload_offer_image
