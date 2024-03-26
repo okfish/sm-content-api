@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import functools
 from aiohttp_retry.retry_options import ExponentialRetry
 
@@ -7,7 +6,7 @@ from .exceptions import ApiException
 from .api import AuthenticationApi
 
 
-logger = logging.getLogger('sm_content_api')
+# logger = logging.getLogger('sm_content_api')
 retry_opts = ExponentialRetry(statuses={401, })
 
 
@@ -23,12 +22,13 @@ def refresh_expired_token(retry_options: ExponentialRetry = retry_opts):
         async def wrapper(self, *args, **kwargs):
             max_retries = retry_options.attempts
             config = self.api_client.configuration
-
+            old_token = config.access_token
+            logger = config.logger["sm_content_api"]
             # main idea how to avoid using recursions was proudly stolen from aiohttp_retry.client
             current_attempt = 0
 
             while True:
-                print(f"Attempt {current_attempt + 1} out of {max_retries}")
+                logger.info(f"Attempt {current_attempt + 1} out of {max_retries}")
 
                 current_attempt += 1
                 try:
@@ -48,8 +48,8 @@ def refresh_expired_token(retry_options: ExponentialRetry = retry_opts):
                         raise e
 
                     if e.status in retry_options.statuses:
-                        print(f"Refreshing expired token.  "
-                                       f"Old was {config.access_token[:8]}")
+                        logger.info(f"Refreshing expired token.  "
+                                    f"Old was {old_token[:8] if old_token and len(old_token) > 8 else 'None'}")
                         auth_api = AuthenticationApi(self.api_client)
                         resp = await auth_api.get_token(config.client_id,
                                                         config.client_secret,

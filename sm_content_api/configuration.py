@@ -12,7 +12,6 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-
 import copy
 import logging
 from logging import FileHandler
@@ -113,7 +112,7 @@ class Configuration:
         """Client Secret for OAuth authentication
         """
         self.grant_type = grant_type
-        """Client Secret for OAuth authentication
+        """Grant Type for OAuth authentication
         """
         self.access_token = access_token
         """Access token
@@ -375,12 +374,12 @@ class Configuration:
 
         :return: The report for debugging.
         """
-        return "Python SDK Debug Report:\n"\
-               "OS: {env}\n"\
-               "Python Version: {pyversion}\n"\
-               "Version of the API: 0.0.2a\n"\
-               "SDK Package Version: 1.0.0".\
-               format(env=sys.platform, pyversion=sys.version)
+        return "Python SDK Debug Report:\n" \
+               "OS: {env}\n" \
+               "Python Version: {pyversion}\n" \
+               "Version of the API: 0.0.2a\n" \
+               "SDK Package Version: 1.0.0". \
+            format(env=sys.platform, pyversion=sys.version)
 
     def get_host_settings(self):
         """Gets an array of host settings
