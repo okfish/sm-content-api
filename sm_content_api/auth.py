@@ -7,7 +7,7 @@ from .api import AuthenticationApi
 
 
 # logger = logging.getLogger('sm_content_api')
-retry_opts = ExponentialRetry(statuses={401, })
+retry_opts = ExponentialRetry(statuses={401, }, start_timeout=1)
 
 
 def refresh_expired_token(retry_options: ExponentialRetry = retry_opts):
