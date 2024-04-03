@@ -49,7 +49,7 @@ setup(
     author="Oleg Fish",
     author_email="okfish@yandex.ru",
     url="",
-    keywords=["OpenAPI", "OpenAPI-Generator", "Sbermarket Content and Auth API"],
+    keywords=["OpenAPI", "aiohttp", "asyncio", "Sbermarket Content and Auth API"],
     install_requires=REQUIRES,
     packages=find_packages(exclude=["test", "tests"]),
     include_package_data=True,
