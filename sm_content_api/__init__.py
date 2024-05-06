@@ -1,11 +1,15 @@
 # coding: utf-8
 # flake8: noqa
 # noqa: E501
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # import apis into sdk package
 from sm_content_api.api.authentication_api import AuthenticationApi
 from sm_content_api.api.import_api import ImportApi
+from sm_content_api.api.stores_api import StoresApi
+from sm_content_api.api.external_delivery_eta_api import ExternalDeliveryEtaApi
+from sm_content_api.api.external_zones_api import ExternalZonesApi
+from sm_content_api.api.store_merchant_status_api import StoreMerchantStatusApi
 
 # import ApiClient
 from sm_content_api.api_response import ApiResponse
@@ -17,6 +21,7 @@ from sm_content_api.exceptions import ApiValueError
 from sm_content_api.exceptions import ApiKeyError
 from sm_content_api.exceptions import ApiAttributeError
 from sm_content_api.exceptions import ApiException
+from sm_content_api.exceptions import BadRequestException
 
 # import models into sdk package
 from sm_content_api.models.attribute import Attribute
@@ -42,3 +47,26 @@ from sm_content_api.models.option import Option
 from sm_content_api.models.options_group import OptionsGroup
 from sm_content_api.models.stock import Stock
 from sm_content_api.models.import_stocks_request import ImportStocksRequest
+
+from sm_content_api.models.get_stores200_response import GetStores200Response
+from sm_content_api.models.merchant_store_status import MerchantStoreStatus
+from sm_content_api.models.merchant_store_status_scheduled_change import MerchantStoreStatusScheduledChange
+from sm_content_api.models.get_store_merchant_status200_response import GetStoreMerchantStatus200Response
+from sm_content_api.models.get_store_external_delivery_eta200_response import GetStoreExternalDeliveryEta200Response
+from sm_content_api.models.post_external_zones_create_request import PostExternalZonesCreateRequest
+from sm_content_api.models.post_external_zones_create_request_data import PostExternalZonesCreateRequestData
+# from sm_content_api.models.post_store_external_assembly_eta200_response import PostStoreExternalAssemblyEta200Response
+# from sm_content_api.models.post_store_external_assembly_eta207_response import PostStoreExternalAssemblyEta207Response
+# from sm_content_api.models.post_store_external_assembly_eta_request import PostStoreExternalAssemblyEtaRequest
+# from sm_content_api.models.post_store_external_slots_generate_data_parameter import PostStoreExternalSlotsGenerateDataParameter
+# from sm_content_api.models.post_store_external_slots_request import PostStoreExternalSlotsRequest
+# from sm_content_api.models.post_store_slot_template_request import PostStoreSlotTemplateRequest
+# from sm_content_api.models.post_store_slot_template_request_data import PostStoreSlotTemplateRequestData
+from sm_content_api.models.put_external_zones_update_request import PutExternalZonesUpdateRequest
+from sm_content_api.models.put_external_zones_update_request_data import PutExternalZonesUpdateRequestData
+from sm_content_api.models.put_store_external_delivery_eta_v2200_response import PutStoreExternalDeliveryEtaV2200Response
+from sm_content_api.models.put_store_external_delivery_eta_v2_request import PutStoreExternalDeliveryEtaV2Request
+
+from sm_content_api.models.external_delivery_eta import ExternalDeliveryEta
+from sm_content_api.models.external_delivery_eta_with_zone import ExternalDeliveryEtaWithZone
+from sm_content_api.models.zone_coordinates import ZoneCoordinates

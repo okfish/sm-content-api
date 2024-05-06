@@ -51,6 +51,7 @@ class Configuration:
                  api_key=None, api_key_prefix=None,
                  username=None, password=None,
                  client_id=None, client_secret=None, grant_type='client_credentials',
+                 retail_chain_slug=None,
                  access_token=None,
                  server_index=None, server_variables=None,
                  server_operation_index=None, server_operation_variables=None,
@@ -100,6 +101,9 @@ class Configuration:
         """
         self.grant_type = grant_type
         """Grant Type for OAuth authentication
+        """
+        self.retail_chain_slug = retail_chain_slug
+        """Retail Chain slug required for Stores API requests
         """
         self.access_token = access_token
         """Access token
