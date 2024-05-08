@@ -31,7 +31,7 @@ config.client_id = credentials['STORES_CLIENT_ID']  # str |
 config.client_secret = credentials['STORES_CLIENT_SECRET']  # str |
 config.grant_type = credentials['GRANT_TYPE']  # str |
 config.retail_chain_slug = credentials['STORES_RETAIL_CHAIN_SLUG']  # str |
-config.http = credentials['STORES_API_HOST']
+config.host = credentials['STORES_API_HOST']
 config.logger['sm_content_api'] = logger
 
 
@@ -55,9 +55,6 @@ class TestStoreMerchantStatusApi(unittest.IsolatedAsyncioTestCase):
 
         Статус торговой точки, установленный мерчантом
         """
-        # req = smc.models.ImportCategoriesRequest(data=[test_cat_parent, test_cat_child, test_cat_parent_2])
-        # print(req)
-
         api_response = None
 
         try:

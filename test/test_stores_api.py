@@ -12,34 +12,76 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-
+import logging
 import unittest
+from dotenv import dotenv_values
 
+import sm_content_api as smc
 from sm_content_api.api.stores_api import StoresApi
 
+logger = logging.getLogger('sm_content_api')
 
-class TestStoresApi(unittest.TestCase):
+config = smc.configuration.Configuration()
+
+credentials = dotenv_values("../.env.test")
+
+config.access_token = ''
+config.retries = 3  # this enables aiohttp_retry client
+config.client_id = credentials['STORES_CLIENT_ID']  # str |
+config.client_secret = credentials['STORES_CLIENT_SECRET']  # str |
+config.grant_type = credentials['GRANT_TYPE']  # str |
+config.retail_chain_slug = credentials['STORES_RETAIL_CHAIN_SLUG']  # str |
+config.host = credentials['STORES_API_HOST']
+config.logger['sm_content_api'] = logger
+
+
+TEST_STORE_ID = credentials['TEST_STORE_ID']
+
+
+class TestStoresApi(unittest.IsolatedAsyncioTestCase):
     """StoresApi unit test stubs"""
 
     def setUp(self) -> None:
-        self.api = StoresApi()
+        self.client = smc.ApiClient(config)
+        self.api = StoresApi(self.client)
 
-    def tearDown(self) -> None:
-        pass
+    async def asyncTearDown(self) -> None:
+        await self.client.close()
 
-    def test_get_store(self) -> None:
+    async def test_get_store(self) -> None:
         """Test case for get_store
 
         Информация об одной торговой точке
         """
-        pass
+        api_response = None
 
-    def test_get_stores(self) -> None:
+        try:
+            # Import categories
+            api_response = await self.api.get_store(
+                retail_chain_slug=self.client.configuration.retail_chain_slug,
+                merchant_store_id=TEST_STORE_ID)
+        except smc.ApiException as e:
+            print("Exception when calling StoresApi->get_store: %s\n" % e)
+
+        self.assertIsInstance(api_response, smc.models.GetStore200Response)
+        print(api_response.to_str())
+
+    async def test_get_stores(self) -> None:
         """Test case for get_stores
 
         Список своих торговых точек
         """
-        pass
+        api_response = None
+
+        try:
+            # Import categories
+            api_response = await self.api.get_stores(
+                retail_chain_slug=self.client.configuration.retail_chain_slug)
+        except smc.ApiException as e:
+            print("Exception when calling StoresApi->get_stores: %s\n" % e)
+
+        self.assertIsInstance(api_response, smc.models.GetStores200Response)
+        print(api_response.to_str())
 
 
 if __name__ == '__main__':

@@ -26,6 +26,7 @@ from sm_content_api.models.stock import Stock
 from sm_content_api.models.import_stocks_request import ImportStocksRequest
 
 from sm_content_api.models.get_stores200_response import GetStores200Response
+from sm_content_api.models.get_store200_response import GetStore200Response
 from sm_content_api.models.merchant_store_status import MerchantStoreStatus
 from sm_content_api.models.merchant_store_status_scheduled_change import MerchantStoreStatusScheduledChange
 from sm_content_api.models.get_store_merchant_status200_response import GetStoreMerchantStatus200Response
